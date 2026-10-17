@@ -25,10 +25,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24.x
+          registry-url: https://registry.npmjs.org
           cache: pnpm
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Check types and lint
+        run: pnpm check && pnpm lint
+
+      - name: Install browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Test navigation and package build
+        run: pnpm test
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -39,3 +49,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -20,29 +20,19 @@ This project is based on and inspired by [sveltekit-top-loader](https://github.c
 
 ## Install
 
-This renamed package has **not been published to npm yet**. To try the current code:
+Using pnpm:
 
 ```sh
-git clone https://github.com/vinnycrazzy/sveltekit-top-loading.git
-cd sveltekit-top-loading
-pnpm install
-pnpm dev
+pnpm add sveltekit-top-loading
 ```
 
-To use it in another project before publication, build and pack it here:
+Or npm:
 
 ```sh
-pnpm build
-pnpm pack
+npm install sveltekit-top-loading
 ```
 
-Then install the generated archive in your application:
-
-```sh
-npm install /path/to/sveltekit-top-loading-0.1.0.tgz
-```
-
-The examples below use the new package name, `sveltekit-top-loading`.
+Requires **Svelte 5** and **SvelteKit 2.12+ or 3**. These registry installation commands become available after the first npm release.
 
 Svelte 4 is no longer supported. Developing this repository requires Node 22.17+ (Node 24 recommended), pnpm 12, and TypeScript 6. The demo uses SvelteKit 3.1 and Svelte 5.57.
 
@@ -52,19 +42,30 @@ Mount **one instance** in your root `src/routes/+layout.svelte`:
 
 ```svelte
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { SvelteKitTopLoader } from 'sveltekit-top-loading';
-	let { children } = $props();
+
+	let { children }: { children: Snippet } = $props();
 </script>
 
 <SvelteKitTopLoader />
 {@render children()}
 ```
 
+No separate CSS import is required. Keep the loader in the root layout so it stays mounted between pages.
+
 ### Fullscreen with a logo
 
 Place your logo in `static/logo.svg`. Supply a URL that includes your application's base path when applicable.
 
 ```svelte
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import { SvelteKitTopLoader } from 'sveltekit-top-loading';
+
+	let { children }: { children: Snippet } = $props();
+</script>
+
 <SvelteKitTopLoader
 	fullscreen
 	logo="/logo.svg"
@@ -76,6 +77,7 @@ Place your logo in `static/logo.svg`. Supply a URL that includes your applicatio
 	label="Carregando página…"
 	delay={150}
 />
+{@render children()}
 ```
 
 The screen fills the viewport, with a centered logo, spinner and message. The top progress bar remains visible. `showSpinner={false}` hides the spinner in either mode. The screen is a visual indicator and does not trap focus, lock scrolling, or block interaction with the current page.
@@ -85,9 +87,17 @@ The screen fills the viewport, with a centered logo, spinner and message. The to
 A Svelte snippet replaces the logo and centered spinner. The message and top bar remain:
 
 ```svelte
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import { SvelteKitTopLoader } from 'sveltekit-top-loading';
+
+	let { children }: { children: Snippet } = $props();
+</script>
+
 <SvelteKitTopLoader fullscreen label="Preparing your workspace…">
 	<div class="brand">My application</div>
 </SvelteKitTopLoader>
+{@render children()}
 ```
 
 Exported `TopLoaderProps` provides the component's TypeScript API.
@@ -130,6 +140,8 @@ Animations respect `prefers-reduced-motion`. Choose foreground/background and sp
 ## Development
 
 ```sh
+git clone https://github.com/vinnycrazzy/sveltekit-top-loading.git
+cd sveltekit-top-loading
 pnpm install
 pnpm dev
 pnpm check
@@ -140,6 +152,51 @@ pnpm build
 ```
 
 The demo includes fullscreen, spinner and delay controls. Page 1 and Page 2 deliberately wait 800 ms on the server so loading can be observed. The build generates the distributable package and runs publint. Browser tests exercise the real router, desktop/mobile fullscreen behavior, delay, cancellation, history, and reduced motion.
+
+## Publishing to npm
+
+The initial package version is `0.1.0`. Before the first release, authenticate with the npm account that will own `sveltekit-top-loading`:
+
+```sh
+npm login
+npm whoami
+```
+
+Validate the project, run the browser suite, and simulate publication:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm exec playwright install chromium
+pnpm test
+pnpm release:dry-run
+```
+
+The dry run does not upload the package. Both the dry run and real publication run the `prepublishOnly` checks: types, formatting/lint, package generation, and publint. Only `dist`, package metadata, README, and license are shipped.
+
+When you are ready to publish the first version:
+
+```sh
+npm publish
+```
+
+`publishConfig` sets public access and the official npm registry. Complete any authentication or two-factor prompt requested by npm. After publication, users can install it with the commands above.
+
+For future releases, record changes and let Changesets manage version bumps:
+
+```sh
+pnpm exec changeset
+```
+
+The existing GitHub Actions release workflow runs on pushes to `main`: it creates a version PR when changesets exist, or publishes unpublished versions. Configure the repository secret `NPM_TOKEN` with permission to publish the package, and enable GitHub Actions to create pull requests. The workflow checks types, lint, and browser tests before the release step. The local `pnpm release` command also publishes versions through Changesets; use it only when ready to release.
+
+To try the package locally before publication:
+
+```sh
+pnpm package
+pnpm pack --pack-destination /tmp
+```
+
+Install the generated `.tgz` archive from your SvelteKit application with `pnpm add /tmp/sveltekit-top-loading-0.1.0.tgz`.
 
 ## Migration
 

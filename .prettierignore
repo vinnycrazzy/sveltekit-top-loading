@@ -2,3 +2,10 @@
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+
+# Local agent tooling and configuration
+.agents/
+.codex/
+.aws/
+.mcp.json
+.github/skills/
