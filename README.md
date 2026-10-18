@@ -1,5 +1,7 @@
 # sveltekit-top-loading
 
+[![](https://img.shields.io/npm/v/sveltekit-top-loading)](https://www.npmjs.com/package/sveltekit-top-loading)
+
 A navigation progress bar and optional fullscreen loading screen for Svelte 5 and SvelteKit 2.12+ / 3. Uses NProgress and the reactive `$app/state` navigation state.
 
 ## About this project
